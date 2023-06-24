@@ -8,8 +8,11 @@ file(GLOB IMAGES
 
 foreach(IMAGE ${IMAGES})
     get_filename_component(fname ${IMAGE} NAME)
-    # Copy images to bin/images for the program to find them with relative path
-    configure_file(${IMAGE} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/images/${fname} COPYONLY)
+    if(MINGW)
+        configure_file(${IMAGE} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/images/${fname} COPYONLY)
+    else(MINGW)
+        configure_file(${IMAGE} ${CMAKE_CURRENT_BINARY_DIR}/images/${fname} COPYONLY)
+    endif(MINGW)
 endforeach()
 
 file(GLOB_RECURSE SHADER_SOURCES
@@ -24,9 +27,11 @@ file(GLOB_RECURSE SHADER_SOURCES
 source_group("Shaders" FILES ${SHADER_SOURCES})
 
 if(WIN32)
-    # Workaround for building with MinGW. The console output will be supressed with WIN32
-    # add_executable(vulkan_grass_rendering WIN32 ${SOURCES} ${SHADER_SOURCES})
-    add_executable(vulkan_grass_rendering ${SOURCES} ${SHADER_SOURCES})
+    if(MINGW)
+        add_executable(vulkan_grass_rendering ${SOURCES} ${SHADER_SOURCES})
+    else(MINGW)
+        add_executable(vulkan_grass_rendering WIN32 ${SOURCES} ${SHADER_SOURCES})
+    endif(MINGW)
     target_link_libraries(vulkan_grass_rendering ${WINLIBS})
 else(WIN32)
     add_executable(vulkan_grass_rendering ${SOURCES})
@@ -34,10 +39,14 @@ else(WIN32)
 endif(WIN32)
 
 foreach(SHADER_SOURCE ${SHADER_SOURCES})
+    if(NOT MINGW)
+        set(SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+    endif(NOT MINGW)
     if(WIN32)
-        # Build .spv files at bin/shaders for the program to find them with relative path
         get_filename_component(fname ${SHADER_SOURCE} NAME)
-        set(SHADER_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)
+        if(MINGW)
+            set(SHADER_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)
+        endif(MINGW)
 
         add_custom_target(${fname}.spv
             COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_DIR} &&
