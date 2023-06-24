@@ -7,6 +7,7 @@
 #include "SwapChain.h"
 
 class SwapChain;
+class Instance;
 class Device {
     friend class Instance;
 
@@ -20,7 +21,7 @@ public:
 
 private:
     using Queues = std::array<VkQueue, sizeof(QueueFlags)>;
-    
+
     Device() = delete;
     Device(Instance* instance, VkDevice vkDevice, Queues queues);
 

@@ -23,7 +23,9 @@ file(GLOB_RECURSE SHADER_SOURCES
 source_group("Shaders" FILES ${SHADER_SOURCES})
 
 if(WIN32)
-    add_executable(vulkan_grass_rendering WIN32 ${SOURCES} ${SHADER_SOURCES})
+    # Workaround for building with MinGW. The console output will be supressed with WIN32
+    # add_executable(vulkan_grass_rendering WIN32 ${SOURCES} ${SHADER_SOURCES})
+    add_executable(vulkan_grass_rendering ${SOURCES} ${SHADER_SOURCES})
     target_link_libraries(vulkan_grass_rendering ${WINLIBS})
 else(WIN32)
     add_executable(vulkan_grass_rendering ${SOURCES})
@@ -36,7 +38,7 @@ foreach(SHADER_SOURCE ${SHADER_SOURCES})
     if(WIN32)
         get_filename_component(fname ${SHADER_SOURCE} NAME)
         add_custom_target(${fname}.spv
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_DIR} && 
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_DIR} &&
             $ENV{VK_SDK_PATH}/Bin/glslangValidator.exe -V ${SHADER_SOURCE} -o ${SHADER_DIR}/${fname}.spv
             SOURCES ${SHADER_SOURCE}
         )

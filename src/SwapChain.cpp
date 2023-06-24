@@ -1,4 +1,5 @@
 #include <vector>
+#include <limits>
 #include "SwapChain.h"
 #include "Instance.h"
 #include "Device.h"
@@ -28,7 +29,7 @@ namespace {
   VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes) {
       // Second choice
       VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
-      
+
       for (const auto& availablePresentMode : availablePresentModes) {
           if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
               // First choice
@@ -62,7 +63,7 @@ namespace {
 
 SwapChain::SwapChain(Device* device, VkSurfaceKHR vkSurface, unsigned int numBuffers)
   : device(device), vkSurface(vkSurface), numBuffers(numBuffers) {
-    
+
     Create();
 
     VkSemaphoreCreateInfo semaphoreInfo = {};
@@ -199,13 +200,12 @@ bool SwapChain::Acquire() {
         vkQueueWaitIdle(device->GetQueue(QueueFlags::Present));
     }
     VkResult result = vkAcquireNextImageKHR(device->GetVkDevice(), vkSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
-    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        throw std::runtime_error("Failed to acquire swap chain image");
-    }
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         Recreate();
         return false;
+    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("Failed to acquire swap chain image");
     }
 
     return true;
@@ -228,13 +228,11 @@ bool SwapChain::Present() {
 
     VkResult result = vkQueuePresentKHR(device->GetQueue(QueueFlags::Present), &presentInfo);
 
-    if (result != VK_SUCCESS) {
-        throw std::runtime_error("Failed to present swap chain image");
-    }
-
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
         Recreate();
         return false;
+    } else if (result != VK_SUCCESS) {
+        throw std::runtime_error("Failed to present swap chain image");
     }
 
     return true;
