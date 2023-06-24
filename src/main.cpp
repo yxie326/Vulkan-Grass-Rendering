@@ -161,6 +161,8 @@ int main() {
     delete renderer;
     delete swapChain;
     delete device;
+
+    vkDestroySurfaceKHR(instance->GetVkInstance(), surface, nullptr);
     delete instance;
     DestroyWindow();
     return 0;

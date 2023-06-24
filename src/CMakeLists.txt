@@ -8,7 +8,8 @@ file(GLOB IMAGES
 
 foreach(IMAGE ${IMAGES})
     get_filename_component(fname ${IMAGE} NAME)
-    configure_file(${IMAGE} ${CMAKE_CURRENT_BINARY_DIR}/images/${fname} COPYONLY)
+    # Copy images to bin/images for the program to find them with relative path
+    configure_file(${IMAGE} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/images/${fname} COPYONLY)
 endforeach()
 
 file(GLOB_RECURSE SHADER_SOURCES
@@ -33,10 +34,11 @@ else(WIN32)
 endif(WIN32)
 
 foreach(SHADER_SOURCE ${SHADER_SOURCES})
-    set(SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shaders)
-
     if(WIN32)
+        # Build .spv files at bin/shaders for the program to find them with relative path
         get_filename_component(fname ${SHADER_SOURCE} NAME)
+        set(SHADER_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)
+
         add_custom_target(${fname}.spv
             COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_DIR} &&
             $ENV{VK_SDK_PATH}/Bin/glslangValidator.exe -V ${SHADER_SOURCE} -o ${SHADER_DIR}/${fname}.spv
