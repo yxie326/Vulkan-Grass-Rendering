@@ -27,11 +27,7 @@ file(GLOB_RECURSE SHADER_SOURCES
 source_group("Shaders" FILES ${SHADER_SOURCES})
 
 if(WIN32)
-    if(MINGW)
-        add_executable(vulkan_grass_rendering ${SOURCES} ${SHADER_SOURCES})
-    else(MINGW)
-        add_executable(vulkan_grass_rendering WIN32 ${SOURCES} ${SHADER_SOURCES})
-    endif(MINGW)
+    add_executable(vulkan_grass_rendering WIN32 ${SOURCES} ${SHADER_SOURCES})
     target_link_libraries(vulkan_grass_rendering ${WINLIBS})
 else(WIN32)
     add_executable(vulkan_grass_rendering ${SOURCES})
@@ -59,6 +55,10 @@ foreach(SHADER_SOURCE ${SHADER_SOURCES})
 
     # TODO: Build shaders on not windows
 endforeach()
+
+if (MINGW)
+    target_link_options(vulkan_grass_rendering PRIVATE -mconsole)
+endif(MINGW)
 
 target_link_libraries(vulkan_grass_rendering ${ASSIMP_LIBRARIES} Vulkan::Vulkan glfw)
 target_include_directories(vulkan_grass_rendering PRIVATE

@@ -1,5 +1,12 @@
 #pragma once
 
+#ifdef _WIN32
+#pragma comment(linker, "/subsystem:console")
+#include <windows.h>
+#elif defined(__linux__)
+#include <xcb/xcb.h>
+#endif
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
